@@ -16,7 +16,6 @@
 ##BSUB -N
 
 set -eu
-cd /dtu/blackhole/0e/234190/02456-autoregressive-project
 source hpc/env.sh   # uv on the PATH, caches off the home quota
 
 # Your training command, e.g.:
