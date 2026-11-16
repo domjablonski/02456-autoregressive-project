@@ -16,8 +16,8 @@
 ##BSUB -N
 
 set -eu
-cd "$(dirname "$0")/.."
+cd /dtu/blackhole/0e/234190/02456-autoregressive-project
 source hpc/env.sh   # uv on the PATH, caches off the home quota
 
 # Your training command, e.g.:
-# uv run python train.py
+uv run python src/protgen/models/mlp.py
