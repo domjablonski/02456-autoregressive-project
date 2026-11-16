@@ -15,8 +15,13 @@
 ##BSUB -B
 ##BSUB -N
 
+<<<<<<< HEAD
 set -eu
 cd /dtu/blackhole/0e/234190/02456-autoregressive-project
+=======
+#set -eu
+#cd "$(dirname "$0")/.."
+>>>>>>> e10d445092b76a832f3ecced66b4a492cd748a86
 source hpc/env.sh   # uv on the PATH, caches off the home quota
 
 # Your training command, e.g.:
