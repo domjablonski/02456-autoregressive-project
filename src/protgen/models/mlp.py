@@ -3,12 +3,12 @@ from torch.utils.data import DataLoader, TensorDataset
 from pathlib import Path
 import torch.nn.functional as F
 import pandas as pd
-import numpy as np
 import torch
 import torch.nn as nn
 
 
 ROOT = Path(__file__).resolve().parents[3]
+device = "cuda" if torch.cuda.is_available() else "cpu"
 
 train_data = ProteinDataset(path_to_data=ROOT / "data" / "train.csv")
 val_data = ProteinDataset(path_to_data=ROOT / "data" / "val.csv")
@@ -17,9 +17,9 @@ k = 128
 PAD, BOS, EOS = 0, 1, 2
 vocab_size = train_data.vocab_size 
 embed_dim = 16 
-hidden_dims = 128
+hidden_dims = 512
 batch_size = 256
-epochs = 5
+epochs = 10
 num_samples = 256
 
 def build_model(vocab_size, k):
@@ -47,7 +47,8 @@ def evaluate(model, loader):
     total = 0 
     with torch.no_grad():
         for xb, yb in loader:
-            total += F.cross_entropy(model(xb), yb, reduction="sum").item()
+            xb, yb = xb.to(device), yb.to(device)
+            total +=F.cross_entropy(model(xb), yb, reduction="sum").item()
     return total/len(loader.dataset)
 
 def train(model, train_loader, val_loader, checkpoint_path):
@@ -58,7 +59,8 @@ def train(model, train_loader, val_loader, checkpoint_path):
         model.train()
         train_total = 0
         for xb, yb in train_loader:
-            loss = F.cross_entropy(model(xb), yb)
+            xb, yb = xb.to(device), yb.to(device)
+            loss =F.cross_entropy(model(xb), yb)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
@@ -80,7 +82,7 @@ def generate(model, dataset, k, max_len=127):
     model.eval()
     tokens = [PAD] * (k - 1) + [BOS]
     for _ in range(max_len):
-        window = torch.tensor([tokens[-k:]])
+        window = torch.tensor([tokens[-k:]], device=device)
         probs = F.softmax(model(window), dim=-1)
         next_token = torch.multinomial(probs, 1).item()
         if next_token == EOS:
@@ -97,13 +99,14 @@ def main():
     train_loader = DataLoader(TensorDataset(X_train, y_train), batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(TensorDataset(X_val, y_val), batch_size=batch_size)
 
-    model = build_model(train_data.vocab_size, k)
+    model = build_model(train_data.vocab_size, k).to(device)
+    print(f"training on {device}")
 
     checkpoint_path = ROOT / "results" / "checkpoints" / "mlp.pt"
     checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
 
     train(model, train_loader, val_loader, checkpoint_path)
-    model.load_state_dict(torch.load(checkpoint_path))
+    model.load_state_dict(torch.load(checkpoint_path, map_location=device))
 
     sequences = [generate(model, train_data, k) for _ in range(num_samples)]
     out_path = ROOT / "results" / "sequences" / "mlp.csv"
