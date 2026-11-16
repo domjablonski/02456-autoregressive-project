@@ -3,7 +3,6 @@ from torch.utils.data import DataLoader, TensorDataset
 from pathlib import Path
 import torch.nn.functional as F
 import pandas as pd
-import numpy as np
 import torch
 import torch.nn as nn
 
@@ -21,6 +20,8 @@ hidden_dims = 128
 batch_size = 256
 epochs = 5
 num_samples = 256
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Using device: {device}")
 
 def build_model(vocab_size, k):
     return nn.Sequential(
@@ -80,7 +81,7 @@ def generate(model, dataset, k, max_len=127):
     model.eval()
     tokens = [PAD] * (k - 1) + [BOS]
     for _ in range(max_len):
-        window = torch.tensor([tokens[-k:]])
+        window = torch.tensor([tokens[-k:]], device=device)
         probs = F.softmax(model(window), dim=-1)
         next_token = torch.multinomial(probs, 1).item()
         if next_token == EOS:
@@ -94,16 +95,24 @@ def main():
 
     X_train, y_train = make_windows(k, train_data)
     X_val, y_val = make_windows(k, val_data)
+
+    X_train = X_train.to(device)
+    y_train = y_train.to(device)
+
+    X_val = X_val.to(device)
+    y_val = y_val.to(device)
     train_loader = DataLoader(TensorDataset(X_train, y_train), batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(TensorDataset(X_val, y_val), batch_size=batch_size)
 
-    model = build_model(train_data.vocab_size, k)
+       
 
+    model = build_model(train_data.vocab_size, k).to(device)
     checkpoint_path = ROOT / "results" / "checkpoints" / "mlp.pt"
     checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
 
     train(model, train_loader, val_loader, checkpoint_path)
-    model.load_state_dict(torch.load(checkpoint_path))
+    model.load_state_dict(torch.load(checkpoint_path, map_location=device))
+    model.eval()
 
     sequences = [generate(model, train_data, k) for _ in range(num_samples)]
     out_path = ROOT / "results" / "sequences" / "mlp.csv"
