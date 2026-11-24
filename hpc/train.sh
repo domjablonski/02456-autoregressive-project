@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #BSUB -q gpuv100
 #BSUB -J train
 #BSUB -n 4

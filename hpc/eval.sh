@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #BSUB -q gpuv100
 #BSUB -J eval
 #BSUB -n 4
