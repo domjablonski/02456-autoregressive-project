@@ -26,3 +26,6 @@ uv run --group eval python eval/eval.py --samples results/sequences/control_real
 uv run --group eval python eval/eval.py --samples results/sequences/control_shuffled.csv --fold
 uv run --group eval python eval/eval.py --samples results/sequences/mlp.csv --fold
 uv run --group eval python eval/eval.py --samples results/sequences/rnn.csv --fold
+
+# The guided sets carry a `setting` column, so eval.py reports one row per lambda.
+uv run --group eval python eval/eval.py --samples results/sequences/guided_HPr.csv --fold
