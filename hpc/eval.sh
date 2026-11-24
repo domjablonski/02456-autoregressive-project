@@ -24,4 +24,4 @@ source hpc/env.sh
 
 uv run --group eval python eval/eval.py --samples results/sequences/control_real.csv --fold
 uv run --group eval python eval/eval.py --samples results/sequences/control_shuffled.csv --fold
-uv run --group eval python eval/eval.py --samples results/sequences/mlp.csv --fold
+uv run --group eval python eval/eval.py --samples results/sequences/rnn.csv --fold
