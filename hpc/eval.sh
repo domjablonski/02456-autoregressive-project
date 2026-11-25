@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #BSUB -q gpuv100
 #BSUB -J eval
 #BSUB -n 4
@@ -24,8 +24,4 @@ source hpc/env.sh
 
 uv run --group eval python eval/eval.py --samples results/sequences/control_real.csv --fold
 uv run --group eval python eval/eval.py --samples results/sequences/control_shuffled.csv --fold
-uv run --group eval python eval/eval.py --samples results/sequences/mlp.csv --fold
 uv run --group eval python eval/eval.py --samples results/sequences/rnn.csv --fold
-
-# The guided sets carry a `setting` column, so eval.py reports one row per lambda.
-uv run --group eval python eval/eval.py --samples results/sequences/guided_HPr.csv --fold

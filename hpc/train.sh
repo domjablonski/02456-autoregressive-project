@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #BSUB -q gpuv100
 #BSUB -J train
 #BSUB -n 4
@@ -16,7 +16,8 @@
 ##BSUB -N
 
 set -eu
-source hpc/env.sh   # uv on the PATH, caches off the home quota
+cd /dtu/blackhole/0e/234190/02456-autoregressive-project
+source /dtu/blackhole/0e/234190/02456-autoregressive-project/hpc/env.sh   # uv on the PATH, caches off the home quota
 
 # Your training command, e.g.:
 uv run python src/protgen/models/mlp.py
